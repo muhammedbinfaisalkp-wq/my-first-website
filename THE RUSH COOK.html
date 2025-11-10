@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE RUSH COOK</title>
+<style>
+  body {
+    font-family: 'Segoe UI', sans-serif;
+    background: #f7f7f7;
+    margin: 0;
+    padding: 40px 20px;
+    text-align: center;
+    color: #2c3e50;
+  }
+  h1 {
+    font-size: 48px;
+    margin-bottom: 5px;
+    color: #222;
+  }
+  p.subtitle {
+    font-size: 20px;
+    margin-bottom: 30px;
+    color: #555;
+    font-style: italic;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .card {
+    cursor: pointer;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transform: translateY(30px);
+    opacity: 0;
+    animation: slideFadeIn 0.5s forwards;
+    text-align: center;
+  }
+  .card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .card:hover img {
+    transform: scale(1.05);
+  }
+  .card-title {
+    font-family: 'Brush Script MT', cursive;
+    font-size: 16px;
+    color: #555;
+    margin: 8px 0 12px 0;
+  }
+  @keyframes slideFadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    inset: 0;
+    background-color: rgba(0,0,0,0.7);
+    animation: fadeIn 0.3s ease;
+  }
+  @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+  .modal-content {
+    background-color: #fff;
+    margin: 5% auto;
+    padding: 30px;
+    border-radius: 18px;
+    max-width: 700px;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.3);
+    text-align: left;
+    position: relative;
+    animation: slideUp 0.4s ease;
+  }
+  @keyframes slideUp { from {transform: translateY(30px); opacity:0;} to {transform: translateY(0); opacity:1;} }
+  .modal-content img {
+    width: 100%;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    height: 300px;
+    object-fit: cover;
+  }
+  .close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 30px;
+    color: #aaa;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+  .close:hover { color: #ff7043; }
+  .modal-content h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 20px;
+  }
+  .modal-content ul {
+    padding-left: 20px;
+    font-size: 18px;
+    line-height: 1.6;
+    list-style-type: square;
+    color: #555;
+  }
+  .modal-content p {
+    font-size: 18px;
+    line-height: 1.7;
+    margin-top: 25px;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+
+<h1>THE RUSH COOK</h1>
+<p class="subtitle">Quick, Delicious Recipes for Every Meal — Explore, Cook, Enjoy!</p>
+
+<div class="gallery" id="gallery"></div>
+
+<div id="recipeModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal()">&times;</span>
+    <img id="modalImage" src="" alt="Recipe Image">
+    <h2 id="modalTitle"></h2>
+    <ul id="modalIngredients"></ul>
+    <p id="modalInstructions"></p>
+  </div>
+</div>
+
+<script>
+const recipes = {
+recipe1:{title:"Heavenly Buttermilk Pancakes",image:"https://tse1.mm.bing.net/th/id/OIP.yt8UWylOz4C4k0srPvdgbwAAAA?cb=ucfimgc2&w=313&h=626&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["1 cup all-purpose flour","1 cup buttermilk","1 large egg","2 tbsp sugar","1 tsp baking powder","1/2 tsp baking soda","Pinch of salt","Butter for cooking"],instructions:"Whisk together flour, sugar, baking powder, baking soda, and salt. In another bowl, mix buttermilk and egg. Combine wet and dry ingredients until smooth. Heat skillet with butter, pour 1/4 cup batter for each pancake. Cook until bubbles form, flip, cook until golden. Serve stacked with maple syrup and fresh berries."},
+recipe2:{title:"Crispy Bacon & Eggs Breakfast Duo",image:"https://fairwaysgardencentre.co.uk/wp-content/uploads/2025/02/Fairways-Breakfast-480x640.jpg",ingredients:["4 slices thick-cut bacon","2 large eggs","Salt & pepper to taste","1 tsp butter"],instructions:"Cook bacon in skillet over medium heat until crispy. Remove bacon and set aside. Fry eggs in bacon grease or butter to desired doneness. Season with salt & pepper. Serve bacon alongside eggs with toast or avocado."},
+recipe3:{title:"Gourmet Stacked Burger Perfection",image:"https://tse1.mm.bing.net/th/id/OIP.drGQEdvzA1-VCnzPigwBVwHaFj?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["2 beef patties","Burger buns","Lettuce","Tomato slices","Onion rings","Pickles","Cheddar cheese","Ketchup & mustard"],instructions:"Grill beef patties to preferred doneness. Toast buns lightly. Assemble bottom bun with lettuce, tomato, onion, patty, cheese, top with second patty, pickles, ketchup, mustard, and top bun. Serve immediately with fries."},
+recipe4:{title:"Smoky BBQ Pulled Pork Sandwich",image:"https://tse3.mm.bing.net/th/id/OIP.8auyev8XEqVkLNUgfzhGawHaJQ?cb=ucfimgc2&w=720&h=900&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["2 lb pulled pork","1 cup BBQ sauce","4 sandwich buns","Coleslaw"],instructions:"Warm pulled pork with BBQ sauce. Pile pork on buns, top with coleslaw. Serve warm with pickles on the side."},
+recipe5:{title:"Golden Cornbread Delight",image:"https://yummfully.com/wp-content/uploads/2023/10/Golden-Sweet-Cornbread-Recipe-960x960.jpg",ingredients:["1 cup cornmeal","1 cup flour","1 egg","1 cup milk","1/4 cup melted butter","2 tbsp sugar"],instructions:"Preheat oven to 200°C. Mix cornmeal, flour, sugar. Add egg, milk, melted butter. Pour into greased pan. Bake 20–25 min until golden brown. Serve warm with honey butter."},
+recipe6:{title:"Cheesy Baked Mac & Cheese Supreme",image:"https://tse3.mm.bing.net/th/id/OIP.QEPx0ugWeS6yRGNJvaf2IQHaHa?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["250 g elbow macaroni","2 cups shredded cheddar cheese","1.5 cups milk","2 tbsp butter","2 tbsp flour","Salt & pepper"],instructions:"Cook macaroni al dente. In saucepan, melt butter, whisk in flour to make roux, slowly add milk until thickened. Stir in cheese until melted. Mix with pasta. Pour into baking dish, top with extra cheese, bake 20 min until bubbly and golden."},
+recipe7:{title:"Southern Fried Chicken Crunch",image:"https://tse2.mm.bing.net/th/id/OIP.Li8pxx1mH1MnM7LYG83SeAHaHa?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["8 chicken drumsticks","2 cups flour","1 tbsp paprika","1 tbsp garlic powder","1 tsp cayenne pepper","Salt & pepper","Oil for frying"],instructions:"Mix flour with spices. Coat chicken pieces evenly. Heat oil in skillet, fry chicken until golden and internal temp 75°C. Drain on paper towels. Serve with hot sauce or honey."},
+recipe8:{title:"Cajun Shrimp & Grits Bowl",image:"https://tse4.mm.bing.net/th/id/OIP.HvFKPzkQXBC5k4nnMR53RgHaLH?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["300 g shrimp","1 cup grits","2 tbsp butter","2 cloves garlic, minced","1 tsp Cajun seasoning","Salt & pepper"],instructions:"Cook grits per package. Sauté garlic in butter, add shrimp and Cajun seasoning until cooked through. Serve shrimp atop grits, garnish with parsley and lemon wedges."},
+recipe9:{title:"Classic Cheeseburger Supreme",image:"https://quick-preview.eu-central-1.linodeobjects.com/media/images/CHEESEBURGER_DETAIL_iPbqBzN.format-jpeg.jpegquality-75.jpg",ingredients:["Beef patty","Cheddar cheese slice","Bun","Lettuce","Tomato","Onion"],instructions:"Grill beef patty, melt cheese slice on top. Assemble burger with bun, lettuce, tomato, onion. Serve with ketchup and fries."},
+recipe10:{title:"Apple Pie Classic",image:"https://tse2.mm.bing.net/th/id/OIP.PfYDPRx25TJjn2E_PdldCAHaJl?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["6 apples, peeled and sliced","2 cups flour","1 cup sugar","1 cup butter","1 tsp cinnamon","Pinch of nutmeg"],instructions:"Prepare crust with flour and butter. Fill with sliced apples, sugar, cinnamon, nutmeg. Cover with top crust, crimp edges, cut vents. Bake at 180°C for 45–50 min until golden."},
+recipe11:{title:"Pumpkin Soup Delight",image:"https://healthyfitnessmeals.com/wp-content/uploads/2019/09/Roasted-pumpkin-soup-8.jpg",ingredients:["500 g pumpkin, cubed","1 onion, chopped","2 cups vegetable stock","1/2 cup cream","Salt & pepper"],instructions:"Sauté onion until translucent. Add pumpkin and stock, cook until pumpkin is tender. Blend until smooth, stir in cream. Season with salt & pepper, serve hot with croutons."},
+recipe12:{title:"Grilled Salmon with Lemon Butter",image:"https://tse3.mm.bing.net/th/id/OIP.IKp18D5WKqwyCdaVIr7mdQHaKG?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["2 salmon fillets","2 tbsp butter","1 lemon, sliced","Salt & pepper","Fresh dill"],instructions:"Season salmon with salt & pepper. Grill skin-side down 6–8 min. Melt butter with lemon juice, drizzle over salmon. Garnish with dill."},
+recipe13:{title:"BBQ Chicken Drumsticks",image:"https://th.bing.com/th/id/OIP.UtO4LJl4XPl5-x1Ia9aLGgHaLH?w=204&h=306&c=7&r=0&o=7&cb=ucfimgc2&dpr=1.3&pid=1.7&rm=3",ingredients:["6 chicken drumsticks","1/2 cup BBQ sauce","1 tsp smoked paprika","Salt & pepper"],instructions:"Season drumsticks. Brush with BBQ sauce. Bake at 200°C 35–40 min, basting halfway. Serve hot."},
+recipe14:{title:"Classic BLT Sandwich",image:"https://tse3.mm.bing.net/th/id/OIP.-pQvoOCyL2BhHyElNiD0BgHaE8?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["4 slices bacon","2 slices bread, toasted","Lettuce leaves","Tomato slices","Mayonnaise"],instructions:"Cook bacon until crispy. Spread mayo on toasted bread, layer lettuce, tomato, bacon. Serve cut in half."},
+recipe15:{title:"New York Style Cheesecake",image:"https://bakerbynature.com/wp-content/uploads/2015/05/IMG_1699-3-727x1024.jpg",ingredients:["500 g cream cheese","1 cup sugar","3 eggs","Graham cracker crust","1 tsp vanilla"],instructions:"Mix cream cheese with sugar until smooth. Beat in eggs one at a time, add vanilla. Pour over crust. Bake at 160°C 50 min. Cool and refrigerate 4 h. Serve with strawberry sauce."},
+recipe16:{title:"Buffalo Wings Spicy Treat",image:"https://th.bing.com/th/id/R.d7399e948b3862165e4e0249541c58f8?rik=WxL0DdQp8TWYfA&pid=ImgRaw&r=0",ingredients:["12 chicken wings","1/4 cup hot sauce","2 tbsp butter","Salt & pepper","Celery sticks"],instructions:"Bake or fry wings until crispy. Melt butter, mix with hot sauce. Toss wings in sauce. Serve with celery and blue cheese dressing."},
+recipe17:{title:"Clam Chowder Creamy Bowl",image:"https://tse1.mm.bing.net/th/id/OIP.87gIqWTERxciGwuT1GxFZQHaHa?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["300 g clams","2 potatoes, diced","1 onion, chopped","1 celery stalk, chopped","1 cup cream","2 tbsp butter","Salt & pepper"],instructions:"Cook onion and celery in butter. Add potatoes, cook until tender. Add clams and cream. Simmer 10 min. Season, serve warm with parsley."},
+recipe18:{title:"Fried Catfish Fillets",image:"https://pinkowlkitchen.com/wp-content/uploads/2022/06/southern-oven-fried-catfish-featured-image.jpg",ingredients:["4 catfish fillets","1 cup cornmeal","Salt & pepper","Oil for frying"],instructions:"Season fillets. Coat with cornmeal. Fry in hot oil until crispy golden brown. Serve with tartar sauce and lemon wedges."},
+recipe19:{title:"Meatloaf Classic American",image:"https://tse1.mm.bing.net/th/id/OIP.f1FQNLuSIKwHRnaWK9-ifAHaIH?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["500 g ground beef","1 cup bread crumbs","1 egg","1 onion, chopped","1/2 cup tomato sauce","Salt & pepper"],instructions:"Mix all ingredients, shape into loaf. Bake at 180°C 50–60 min. Spread additional tomato sauce on top, bake 10 more min. Slice and serve."},
+recipe20:{title:"Mashed Potatoes Creamy Delight",image:"https://tse2.mm.bing.net/th/id/OIP.7aVSysGzsV69ppkJRSm89wHaLG?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["1 kg potatoes, peeled and cubed","100 g butter","1/2 cup milk","Salt & pepper"],instructions:"Boil potatoes until tender. Mash with butter and milk. Season with salt & pepper. Serve hot with gravy."},
+recipe21:{title:"Philly Cheesesteak Sandwich",image:"https://tse1.mm.bing.net/th/id/OIP.HSeqenKV7iJJmimJmUyUVwHaLH?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["250 g thinly sliced beef","1 hoagie roll","1/2 onion, sliced","1/2 bell pepper, sliced","Provolone cheese"],instructions:"Sauté beef with onion and pepper. Fill hoagie roll, top with melted cheese. Serve hot."},
+recipe22:{title:"Caesar Salad Classic",image:"https://www.thespruceeats.com/thmb/PK-gzCMO2_chv0BfVqmzfBtou3M=/2500x1656/filters:fill(auto,1)/caesar-salad-2500-56a210635f9b58b7d0c62d64.jpg",ingredients:["Romaine lettuce","Croutons","Parmesan cheese","Caesar dressing"],instructions:"Toss lettuce with dressing. Top with croutons and parmesan. Serve chilled."},
+recipe23:{title:"BBQ Ribs Tender & Juicy",image:"https://th.bing.com/th/id/R.a44f397230c203bd3c9da35423dd801e?rik=ZXnxvB1zUjJgig&pid=ImgRaw&r=0",ingredients:["1 kg pork ribs","BBQ rub","BBQ sauce"],instructions:"Rub ribs with seasoning. Bake 2 h at 150°C covered. Finish on grill, brush with BBQ sauce. Serve hot."},
+recipe24:{title:"Chocolate Chip Cookies",image:"https://tse2.mm.bing.net/th/id/OIP.sr8jbdbSFzCuQVpktSALcQHaLH?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["2 cups flour","1 cup sugar","1 cup butter","2 eggs","1 cup chocolate chips"],instructions:"Cream butter and sugar. Add eggs. Mix in flour. Fold in chocolate chips. Scoop onto baking tray, bake 10–12 min at 180°C."},
+recipe25:{title:"Grilled Cheese Sandwich",image:"https://www.thespruceeats.com/thmb/HFhwRkYlizNSPj98HKQmsHN478c=/2400x1600/filters:fill(auto,1)/grilled-cheese-sandwich-4783471-last-a2b5beafbf3b4b308d0eb1ef4a359953.jpg",ingredients:["2 slices bread","2 slices cheddar cheese","1 tsp butter"],instructions:"Butter bread slices, place cheese between. Grill until golden brown and cheese melts. Serve hot."},
+recipe26:{title:"Pot Roast Classic Dinner",image:"https://gardeninthekitchen.com/wp-content/uploads/2020/10/classic-pot-roast_0943-2-756x1024.jpg",ingredients:["1 kg beef roast","3 carrots, chopped","3 potatoes, chopped","1 onion, chopped","2 cups beef stock","Salt & pepper"],instructions:"Brown roast in skillet. Add vegetables and stock. Cover, cook 3 h at 160°C. Slice and serve with gravy."},
+recipe27:{title:"American Pancake Stack Deluxe",image:"https://recipesblob.oetker.co.uk/assets/4acbec1ea07846acb27a8abc3c4d0738/1272x764/american-pancakes-v1.jpg",ingredients:["2 cups flour","2 cups milk","2 eggs","2 tbsp sugar","2 tsp baking powder","1 tsp vanilla","Butter for cooking"],instructions:"Mix dry ingredients. Add milk, eggs, vanilla. Whisk until smooth. Cook pancakes on skillet, stack, serve with maple syrup, fresh berries, and whipped cream."},
+recipe28:{title:"Jambalaya Spicy Rice Delight",image:"https://tse2.mm.bing.net/th/id/OIP.ENR3dEoIyJClgtnaGQgSxwHaJx?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["1 cup rice","200 g chicken","100 g sausage","100 g shrimp","1 onion, chopped","1 bell pepper, chopped","2 cloves garlic","2 cups chicken stock","Cajun seasoning"],instructions:"Cook chicken, sausage, shrimp with spices. Add onion, pepper, garlic, then rice and stock. Simmer 20–25 min until rice is cooked. Serve hot garnished with parsley."},
+recipe29:{title:"Key Lime Pie Tart",image:"https://tse3.mm.bing.net/th/id/OIP.PaU3V-cWpnfGGEyn5oQGYwAAAA?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["Graham cracker crust","1 can condensed milk","3 egg yolks","1/2 cup lime juice","Whipped cream"],instructions:"Mix condensed milk, yolks, lime juice. Pour into crust. Bake 15 min at 160°C. Chill, top with whipped cream, serve cool."},
+recipe30:{title:"Triple Layer Club Sandwich",image:"https://tse2.mm.bing.net/th/id/OIP.rRvDQxCaXMI_KqrdTtn53QHaE8?cb=ucfimgc2&w=720&h=480&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["3 slices bread, toasted","Turkey slices","Bacon slices","Lettuce","Tomato","Mayonnaise"],instructions:"Layer turkey, bacon, lettuce, tomato with mayo between toasted bread slices. Cut into triangles, serve with chips."},
+recipe31:{title:"Chicken Fajitas Sizzling",image:"https://insanelygoodrecipes.com/wp-content/uploads/2024/06/Chicken-Fajitas-Sizzling-In-Skillet-2.jpg",ingredients:["200 g chicken strips","1 onion, sliced","1 bell pepper, sliced","Tortillas","Fajita seasoning","Olive oil"],instructions:"Sauté chicken, onion, and peppers in olive oil with seasoning. Serve hot in tortillas with salsa and sour cream."},
+recipe32:{title:"Chili Con Carne Classic",image:"https://www.bing.com/th/id/OIP.aY3BOSG480mQ587Gv6kQ5AHaJQ?w=172&h=211&c=8&rs=1&qlt=90&o=6&cb=ucfimgc1&dpr=1.3&pid=3.1&rm=2",ingredients:["500 g ground beef","1 can kidney beans","1 can chopped tomatoes","1 onion, chopped","2 tsp chili powder","2 cloves garlic"],instructions:"Cook beef and onions until browned. Add garlic, tomatoes, beans, chili powder. Simmer 30 min. Serve with shredded cheese and sour cream."},
+recipe33:{title:"Corn on the Cob Grilled",image:"https://bing.com/th?id=OSK.b887e7700100f52c16187399fad01e96",ingredients:["4 corn cobs","2 tbsp butter","Salt & pepper"],instructions:"Grill corn until charred. Brush with butter, season with salt and pepper. Serve immediately."},
+recipe34:{title:"Baked Ziti Cheesy Delight",image:"https://tse2.mm.bing.net/th/id/OIP.ltglc0yeQ_kWN4mdnYy-rAHaHa?cb=ucfimgc2&rs=1&pid=ImgDetMain&o=7&rm=3",ingredients:["250 g ziti pasta","2 cups marinara sauce","1 cup ricotta","1 cup mozzarella","1/2 cup parmesan"],instructions:"Cook pasta al dente. Mix with sauces and cheeses. Bake 20 min at 180°C until bubbly. Serve hot."},
+recipe35:{title:"New England Lobster Roll",image:"https://www.simplyrecipes.com/thmb/0dEqhZclcl_I2-7rTCoP40Mn0bQ=/2000x1334/filters:no_upscale():max_bytes(150000):strip_icc()/__opt__aboutcom__coeus__resources__content_migration__simply_recipes__uploads__2020__07__New-England-Lobster-Rolls-LEAD-3c-2625865134294539b4460f6155f90ce3.jpg",ingredients:["200 g cooked lobster meat","1 hot dog bun","1 tbsp mayonnaise","1 tsp lemon juice","1 tbsp chopped celery","Butter"],instructions:"Mix lobster, mayo, celery, and lemon. Toast bun with butter. Fill bun with lobster mixture. Serve chilled or lightly warm."}
+};
+
+function renderGallery() {
+  const gallery = document.getElementById("gallery");
+  gallery.innerHTML = '';
+  Object.keys(recipes).forEach((key, index) => {
+    const recipe = recipes[key];
+    const card = document.createElement("div");
+    card.className = "card";
+    card.style.animationDelay = `${index*0.05}s`;
+    card.onclick = () => openModal(key);
+    card.innerHTML = `<img src="${recipe.image}" alt="${recipe.title}"><div class="card-title">${recipe.title}</div>`;
+    gallery.appendChild(card);
+  });
+}
+
+function openModal(key) {
+  const recipe = recipes[key];
+  document.getElementById("modalTitle").textContent = recipe.title;
+  document.getElementById("modalImage").src = recipe.image;
+  document.getElementById("modalIngredients").innerHTML = recipe.ingredients.map(i=>`<li>${i}</li>`).join('');
+  document.getElementById("modalInstructions").textContent = recipe.instructions;
+  document.getElementById("recipeModal").style.display = "block";
+}
+
+function closeModal() {
+  document.getElementById("recipeModal").style.display = "none";
+}
+
+window.onclick = function(event) {
+  const modal = document.getElementById("recipeModal");
+  if(event.target === modal) modal.style.display = "none";
+}
+
+document.addEventListener("DOMContentLoaded", renderGallery);
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
